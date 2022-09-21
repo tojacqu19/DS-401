@@ -1,0 +1,129 @@
+import matplotlib.pyplot as plt
+from scipy import stats
+import numpy as np 
+import pandas as pd
+
+def climate(x):
+    data_file = open(x, "r").readlines()
+    
+    annual_temp = []
+    annual_prec = []
+    
+    max_temp = []
+    min_temp = [] 
+    
+    year_list = []
+    avg_temp_list = []
+    
+    for i in range(1,len(data_file)):
+        split_data = data_file[i].split(",")
+        date_l = split_data[0]
+        year = date_l.split("-")[0]
+        
+        prec = split_data[1].strip("")
+        prec = prec.strip(" ")
+        
+        temax = split_data[2].strip()
+        temin = split_data[3].strip() 
+        if temax and temin != None and temax and temin != "" and temax and temin != " ":     
+            date_temp_tuple = (year, temax, temin)
+            
+            annual_temp.append(date_temp_tuple)
+        
+        if prec != None and prec != "" and prec != " ":
+            date_prec_tuple = (year, float(prec)) 
+
+            annual_prec.append(date_prec_tuple)
+        else:
+            pass
+    temp_list = []
+    
+    year_list.append(annual_temp[0][0])
+    num_year = 1
+    max_sum = float(annual_temp[0][1])
+    min_sum = float(annual_temp[0][2])
+    
+    for i in range(1, len(annual_temp)):
+        yr = annual_temp[i][0]
+        maxtp = float(annual_temp[i][1])
+        mintp = float(annual_temp[i][2])
+        
+        if yr == year_list[-1]:
+            max_sum += maxtp
+            min_sum += mintp
+            num_year += 1
+            
+        if yr not in year_list:
+            year_list.append(yr)
+            max_temp.append(max_sum/num_year)
+            min_temp.append(min_sum/num_year)
+            
+            max_sum = maxtp
+            min_sum = mintp
+            num_year = 1
+    max_temp.append(max_sum/num_year)  
+    min_temp.append(min_sum/num_year)
+    
+    ####
+    #Precipitation
+    ####
+    ####
+    year_prec = []
+    prec_list = []
+    
+    
+    year_prec.append(annual_prec[0][0])
+    prec_sum = float(annual_prec[0][1])
+
+    for i in range(1, len(annual_prec)):
+        yr = annual_prec[i][0]
+        pc = annual_prec[i][1]
+        if yr == year_prec[-1]: 
+            prec_sum += float(pc)
+            
+        if yr not in year_prec:
+            #print(yr)
+            year_prec.append(yr)
+            prec_list.append(prec_sum)
+            prec_sum = pc
+        #print(prec_sum)
+    prec_list.append(prec_sum)    
+    
+    year_list = year_list[1:-1]
+    max_temp = max_temp[1:-1]
+    min_temp = min_temp[1:-1]
+    prec_list = prec_list[1:-1]
+    
+    ####
+    #Graph#
+    ####
+    #print(len(prec_list))
+    f = plt.figure()
+    f.set_figwidth(25)
+    f.set_figheight(7)
+    plt.plot([i for i in range(len(year_list))],max_temp, color='r', label = "MAX")
+    plt.legend()
+
+
+    plt.plot([i for i in range(len(year_list))],min_temp, color='b', label = "MIN")
+    plt.legend()
+    plt.xlabel("Year")
+    plt.ylabel("Average temperature")
+    plt.title('Average Temperature per Year')
+    plt.xticks([i for i in range(len(year_list))], year_list, rotation ='vertical')
+    
+    plt.show()
+    
+    
+    f = plt.figure()
+    f.set_figwidth(25)
+    f.set_figheight(7)
+    plt.plot([i for i in range(len(year_list))],prec_list, color = "g")
+
+    plt.xlabel("Year")
+    plt.ylabel("Total precipitation")
+    plt.title('Total precipitation per year')
+    plt.xticks([i for i in range(len(year_list))], year_list, rotation ='vertical')
+    
+    plt.show()
+climate("rww-weather-data.csv")
